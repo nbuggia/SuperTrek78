@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Tuple
 
 # Constants
-GRID_COLS = 100
+GRID_COLS = 98
 GRID_ROWS = 50
 TILE_SIZE = 12
 SCREEN_WIDTH = GRID_COLS * TILE_SIZE
@@ -25,6 +25,14 @@ GALAXY_HEIGHT = 10
 
 
 class RenderUtils:
+    COLOR_RED = (255, 0, 0)
+    COLOR_YELLOW = (255, 255, 0)
+    COLOR_GREEN = (0, 255, 0)
+    COLOR_FG1 = (75, 75, 75)
+    COLOR_FG2 = (50, 50, 50)
+    COLOR_FG3 = (25, 25, 25)
+    COLOR_BG = (0, 0, 0)
+
     def __init__(self, tile_size: int, tileset_path: str) -> None:
         self.tile_size = tile_size
         self.char_to_tile: Dict[str, pygame.Surface] = {}
@@ -53,11 +61,11 @@ class RenderUtils:
     # Draw a single tile on the screen at the specified column and row
     def draw_tile(
         self,
-        screen: pygame.Surface,
-        tile: pygame.Surface,
-        col: int,
-        row: int,
-        fg: Tuple[int, int, int],
+        screen: pygame.Surface, 
+        tile: pygame.Surface, 
+        col: int, 
+        row: int, 
+        fg: Tuple[int, int, int], 
         bg: Tuple[int, int, int],
     ) -> None:
         x = col * self.tile_size
@@ -70,12 +78,12 @@ class RenderUtils:
     # Draw a string of text starting at the specified column and row
     def draw_text(
         self,
-        surface: pygame.Surface,
+        screen: pygame.Surface,
         text: str,
-        x: int,
-        y: int,
-        fg_color: pygame.Color = pygame.Color("white"),
-        bg_color: pygame.Color = pygame.Color("black"),
+        col: int,
+        row: int,
+        fg: Tuple[int, int, int], 
+        bg: Tuple[int, int, int],
     ) -> None:
         try:
             encoded = text.encode("cp437")
@@ -86,17 +94,20 @@ class RenderUtils:
         for i, byte in enumerate(encoded):
             tile = self.char_to_tile.get(byte)
             if tile:
+                x = (col + i) * self.tile_size
+                y = row * self.tile_size
+
                 # Create a surface for the tile with background color
                 char_surface = pygame.Surface((self.tile_size, self.tile_size), pygame.SRCALPHA)
-                char_surface.fill(bg_color)
+                char_surface.fill(bg)
 
                 # Tint the character tile with the foreground color
                 tinted_tile = tile.copy()
-                tinted_tile.fill(fg_color, special_flags=pygame.BLEND_RGBA_MULT)
+                tinted_tile.fill(fg, special_flags=pygame.BLEND_RGBA_MULT)
 
                 # Blit tinted tile onto char_surface, then onto the main surface
                 char_surface.blit(tinted_tile, (0, 0))
-                surface.blit(char_surface, (x + i * self.tile_size, y))
+                screen.blit(char_surface, (x, y))
 
 
 ########################################################
@@ -132,20 +143,54 @@ class GalaxyMap:
 
     # Placeholder for drawing the map on the screen
     def draw(self, screen):
-        tile = self.renderer.tile_set[0]
-        self.renderer.draw_tile(screen, tile, 1, 1, (0, 255, 0), (0, 0, 0))
-        tile = self.renderer.tile_set[3]
-        self.renderer.draw_tile(screen, tile, 1, 2, (0, 255, 0), (0, 0, 0))
-        tile = self.renderer.tile_set[6]
-        self.renderer.draw_tile(screen, tile, 1, 3, (0, 255, 0), (0, 0, 0))
         self.renderer.draw_text(
             screen,
-            "╔═══════════════════════════════════════ Galaxy [M]ap ═════════════════════════════════════════╗",
+            "╔══════════════════════════════════════ SUPER TREK 78 ═════════════════════════════════════════╗",
             1,
             1,
-            (0, 255, 0),
-            (0, 0, 0),
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
         )
+        self.renderer.draw_text(
+            screen,
+            "║                                                                                              ║",
+            1,
+            2,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
+        self.renderer.draw_text(
+            screen,
+            "║       Star date: XXXXX.X           Time left: XXX days             Klingons: XX              ║",
+            1,
+            3,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
+        self.renderer.draw_text(
+            screen,
+            "║                                                                                              ║",
+            1,
+            4,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
+        self.renderer.draw_text(
+            screen,
+            "╠═══════════════════════════════════════ Galaxy [M]ap ═════════════════════════════════════════╣",
+            1,
+            5,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
+
+
+
+#╔═══════════════════════════════════════ SUPER TREK 78 ════════════════════════════════════════╗
+#║                                                                                              ║
+#║       Star date: XXXXX.X           Time left: XXX days             Klingons: XX              ║
+#║                                                                                              ║
+#╠═══════════════════════════════════════ Galaxy [M]ap ═════════════════════════════════════════╣
 
 
 ########################################################
