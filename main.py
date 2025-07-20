@@ -19,6 +19,43 @@ SCREEN_HEIGHT = GRID_ROWS * TILE_SIZE
 GALAXY_WIDTH = 10
 GALAXY_HEIGHT = 10
 
+
+########################################################
+# Class GameState()
+########################################################
+
+
+class GameState:
+    def __init__(self):
+        self.current_sector = (0, 0)
+        self.player_position = (5, 5)
+        self.klingons_remaining = 3
+        self.energy = 1000
+        self.shields = 500
+        self.quadrant_map = self.init_quadrants()
+        self.game_over = False
+
+    def init_quadrants(self):
+        # Could be a 2D list or more complex structure
+        return [[None for _ in range(8)] for _ in range(8)]
+
+    def reset(self):
+        self.__init__()  # Simple reset
+
+    def is_game_over(self):
+        return self.game_over or self.energy <= 0
+
+    # Add methods to update state safely:
+    def move_player(self, dx, dy):
+        x, y = self.player_position
+        self.player_position = (x + dx, y + dy)
+
+    def consume_energy(self, amount):
+        self.energy = max(0, self.energy - amount)
+        if self.energy == 0:
+            self.game_over = True
+
+
 ########################################################
 # Class RenderUtils()
 ########################################################
@@ -61,11 +98,11 @@ class RenderUtils:
     # Draw a single tile on the screen at the specified column and row
     def draw_tile(
         self,
-        screen: pygame.Surface, 
-        tile: pygame.Surface, 
-        col: int, 
-        row: int, 
-        fg: Tuple[int, int, int], 
+        screen: pygame.Surface,
+        tile: pygame.Surface,
+        col: int,
+        row: int,
+        fg: Tuple[int, int, int],
         bg: Tuple[int, int, int],
     ) -> None:
         x = col * self.tile_size
@@ -82,7 +119,7 @@ class RenderUtils:
         text: str,
         col: int,
         row: int,
-        fg: Tuple[int, int, int], 
+        fg: Tuple[int, int, int],
         bg: Tuple[int, int, int],
     ) -> None:
         try:
@@ -123,6 +160,54 @@ class Sector:
 
 
 ########################################################
+# Class Status()
+########################################################
+
+
+# Represents the status of the game
+class StatusDisplay:
+
+    def __init__(self, row: int, renderer: RenderUtils):
+        self.row = row
+        self.renderer = renderer
+
+    # Placeholder for drawing the map on the screen
+    def draw(self, screen):
+        self.renderer.draw_text(
+            screen,
+            "╔══════════════════════════════════════ SUPER TREK 78 ═════════════════════════════════════════╗",
+            1,
+            self.row,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
+        self.renderer.draw_text(
+            screen,
+            "║                                                                                              ║",
+            1,
+            self.row + 1,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
+        self.renderer.draw_text(
+            screen,
+            "║       Star date: XXXXX.X           Time left: XXX days             Klingons: XX              ║",
+            1,
+            self.row + 2,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
+        self.renderer.draw_text(
+            screen,
+            "║                                                                                              ║",
+            1,
+            self.row + 3,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
+
+
+########################################################
 # Class GalaxyMap()
 ########################################################
 
@@ -130,12 +215,13 @@ class Sector:
 # Represents the galaxy map in the Super Trek 78 game
 class GalaxyMap:
 
-    def __init__(self, cols: int, rows: int, renderer: RenderUtils):
-        self.rows = cols
-        self.cols = rows
+    def __init__(self, row: int, galaxy_width: int, galaxy_height, renderer: RenderUtils):
+        self.row = row
+        self.galaxy_width = galaxy_width
+        self.galaxy_height = galaxy_height
         self.renderer = renderer
         # Initialize a 2D grid of sectors
-        self.sectors = [[Sector() for _ in range(self.cols)] for _ in range(self.rows)]
+        self.sectors = [[Sector() for _ in range(self.galaxy_width)] for _ in range(self.galaxy_height)]
 
     # Placeholder for map generation logic
     def generate_map(self):
@@ -145,52 +231,12 @@ class GalaxyMap:
     def draw(self, screen):
         self.renderer.draw_text(
             screen,
-            "╔══════════════════════════════════════ SUPER TREK 78 ═════════════════════════════════════════╗",
-            1,
-            1,
-            self.renderer.COLOR_FG1,
-            self.renderer.COLOR_BG,
-        )
-        self.renderer.draw_text(
-            screen,
-            "║                                                                                              ║",
-            1,
-            2,
-            self.renderer.COLOR_FG1,
-            self.renderer.COLOR_BG,
-        )
-        self.renderer.draw_text(
-            screen,
-            "║       Star date: XXXXX.X           Time left: XXX days             Klingons: XX              ║",
-            1,
-            3,
-            self.renderer.COLOR_FG1,
-            self.renderer.COLOR_BG,
-        )
-        self.renderer.draw_text(
-            screen,
-            "║                                                                                              ║",
-            1,
-            4,
-            self.renderer.COLOR_FG1,
-            self.renderer.COLOR_BG,
-        )
-        self.renderer.draw_text(
-            screen,
             "╠═══════════════════════════════════════ Galaxy [M]ap ═════════════════════════════════════════╣",
             1,
             5,
             self.renderer.COLOR_FG1,
             self.renderer.COLOR_BG,
         )
-
-
-
-#╔═══════════════════════════════════════ SUPER TREK 78 ════════════════════════════════════════╗
-#║                                                                                              ║
-#║       Star date: XXXXX.X           Time left: XXX days             Klingons: XX              ║
-#║                                                                                              ║
-#╠═══════════════════════════════════════ Galaxy [M]ap ═════════════════════════════════════════╣
 
 
 ########################################################
@@ -209,19 +255,13 @@ class SuperTrek78:
         self.screen = pygame.display.set_mode((width, height))
         self.renderer = RenderUtils(tile_size, "assets/Nice_curses_12x12.png")
         self.tile_size = tile_size
-        self.galaxy_map = GalaxyMap(GALAXY_WIDTH, GALAXY_HEIGHT, self.renderer)
+        self.status_display = StatusDisplay(1, self.renderer)
+        self.galaxy_map = GalaxyMap(5, GALAXY_WIDTH, GALAXY_HEIGHT, self.renderer)
 
     def __draw_game(self):
         self.screen.fill((0, 0, 0))
+        self.status_display.draw(self.screen)
         self.galaxy_map.draw(self.screen)
-
-        # TODO: Delete this, just to show what all the tiles look like
-        # Draw all 256 tiles in a 16x16 grid starting at top-left
-        # for i in range(256):
-        #    tile = self.tile_set[i]
-        #    row = i // 16
-        #    col = i % 16
-        #    self.renderer.draw_tile(self.screen, tile, self.tile_size, col, row, (0, 255, 0), (0, 0, 0))
 
         pygame.display.update()
 
