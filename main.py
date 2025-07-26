@@ -232,7 +232,7 @@ class GalaxyMap:
     def __draw_sector(self, screen: pygame.Surface, start_row: int, start_col: int, sector: Sector):
         self.renderer.draw_text(
             screen,
-            "XXX",
+            "░░░░░",
             start_col,
             start_row,
             self.renderer.COLOR_FG1,
@@ -283,9 +283,11 @@ class GalaxyMap:
                 )
 
             # Within the row, draw the state of each sector
+            row = self.start_row + y + 2
             for x in range(self.state.galaxy_width):
                 sector = self.state.sectors[y][x]
-                self.__draw_sector(screen, 5 + x + 5, self.start_row + y + 2, sector)
+                col = 8 + (x * 9)
+                self.__draw_sector(screen, row, col, sector)
 
         self.renderer.draw_text(
             screen,
