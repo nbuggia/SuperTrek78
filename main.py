@@ -229,10 +229,18 @@ class GalaxyMap:
         pass
 
     # Draw a single sector in the map
-    def __draw_sector(self, sector: Sector):
-        pass
+    def __draw_sector(self, screen: pygame.Surface, start_row: int, start_col: int, sector: Sector):
+        self.renderer.draw_text(
+            screen,
+            "XXX",
+            start_col,
+            start_row,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
 
     # Placeholder for drawing the map on the screen
+    # We use "start_row" to keep track of which row we are drawing
     def draw(self, screen: pygame.Surface):
         self.renderer.draw_text(
             screen,
@@ -243,18 +251,50 @@ class GalaxyMap:
             self.renderer.COLOR_BG,
         )
 
-        for y in range(self.state.galaxy_height):
-            self.renderer.draw_text(
-                screen,
-                "║                                                                                              ║",
-                1,
-                self.start_row + y + 1,
-                self.renderer.COLOR_FG1,
-                self.renderer.COLOR_BG,
-            )
+        self.renderer.draw_text(
+            screen,
+            "║        1        2        3        4        5        6        7        8        9       10    ║",
+            1,
+            self.start_row + 1,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
 
+        # Iterate through the sectors, one row at a time. y = row number
+        for y in range(self.state.galaxy_height):
+            if y + 1 < 10:
+                # right justify numbers less than 10
+                self.renderer.draw_text(
+                    screen,
+                    f"║   {y+1}                                                                                          ║",
+                    1,
+                    self.start_row + y + 2,
+                    self.renderer.COLOR_FG1,
+                    self.renderer.COLOR_BG,
+                )
+            else:
+                self.renderer.draw_text(
+                    screen,
+                    f"║  {y+1}                                                                                          ║",
+                    1,
+                    self.start_row + y + 2,
+                    self.renderer.COLOR_FG1,
+                    self.renderer.COLOR_BG,
+                )
+
+            # Within the row, draw the state of each sector
             for x in range(self.state.galaxy_width):
                 sector = self.state.sectors[y][x]
+                self.__draw_sector(screen, 5 + x + 5, self.start_row + y + 2, sector)
+
+        self.renderer.draw_text(
+            screen,
+            "╚══════════════════════════════════════════════════════════════════════════════════════════════╝",
+            1,
+            self.start_row + 11,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
 
 
 ########################################################
