@@ -38,32 +38,33 @@ class Sector:
 
 
 class GameState:
-    def __init__(self, galaxy_width: int, galaxy_height: int):
-        self.current_sector = (0, 0)
-        self.player_position = (5, 5)
-        self.klingons_remaining = 3
-        self.energy = 1000
-        self.shields = 500
-        self.galaxy_width = galaxy_width
-        self.galaxy_height = galaxy_height
-        self.sectors = self.init_sectors()
-        self.game_over = False
+    def __init__(self, galaxy_width: int, galaxy_height: int) -> None:
+        self.current_sector: Tuple[int, int] = (0, 0)
+        self.player_position: Tuple[int, int] = (5, 5)
+        self.klingons_remaining: int = 3
+        self.star_date: int = 0
+        self.energy: int = 1000
+        self.shields: int = 500
+        self.galaxy_width: int = galaxy_width
+        self.galaxy_height: int = galaxy_height
+        self.sectors: List[List[Sector]] = self.init_sectors()
+        self.game_over: bool = False
 
-    def init_sectors(self):
+    def init_sectors(self) -> List[List[Sector]]:
         return [[Sector() for _ in range(self.galaxy_width)] for _ in range(self.galaxy_height)]
 
-    def reset(self):
+    def reset(self) -> None:
         self.__init__()  # Simple reset
 
-    def is_game_over(self):
+    def is_game_over(self) -> bool:
         return self.game_over or self.energy <= 0
 
     # Add methods to update state safely:
-    def move_player(self, dx, dy):
+    def move_player(self, dx: int, dy: int) -> None:
         x, y = self.player_position
         self.player_position = (x + dx, y + dy)
 
-    def consume_energy(self, amount):
+    def consume_energy(self, amount: int) -> None:
         self.energy = max(0, self.energy - amount)
         if self.energy == 0:
             self.game_over = True
@@ -193,7 +194,7 @@ class StatusDisplay:
         )
         self.renderer.draw_text(
             screen,
-            "║       Star date: XXXXX.X           Time left: XXX days             Klingons: XX              ║",
+            "║       Star date: ░░░░░░░.░           Time left: ░░░░░ days             Klingons: ░░░░░              ║",
             1,
             self.start_row + 2,
             self.renderer.COLOR_FG1,
