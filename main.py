@@ -43,12 +43,13 @@ class GameState:
         self.player_position: Tuple[int, int] = (5, 5)
         self.klingons_remaining: int = 3
         self.star_date: int = 0
+        self.time_left: int = 0
         self.energy: int = 1000
         self.shields: int = 500
         self.galaxy_width: int = galaxy_width
         self.galaxy_height: int = galaxy_height
         self.sectors: List[List[Sector]] = self.init_sectors()
-        self.game_over: bool = False
+        self.game_over: bool = True
 
     def init_sectors(self) -> List[List[Sector]]:
         return [[Sector() for _ in range(self.galaxy_width)] for _ in range(self.galaxy_height)]
@@ -108,6 +109,28 @@ class RenderUtils:
 
         self.char_to_tile = self.__build_char_map(tiles)
         return tiles
+
+    # Convert an int to a string with padding to draw a predictable number of char.
+    # Ex. padded_string(25, 5, '0', True) = "00025"
+    # Ex. padded_string(125, 5, ' ', False) = "125  "
+    # Ex. error padded_string(55555, 5, ' ', True) = "99999" (the number is too big to fit the space)
+    def padded_string(self, number: int, fixed_length: int, padding_chr: str, is_right_aligned: bool) -> str:
+        number_str: str = str(number)
+        padding_str: str = ""
+        padding_len: int = fixed_length - len(number_str)
+
+        # if the padding length is negative, the number is longer than our fixed_length, then return the error string
+        # Otherwise, create a padding string for the amount of space we have left
+        if padding_len < 0:
+            return "9" * fixed_length
+        else:
+            padding_str = padding_chr * padding_len
+
+        # if right aligned, put the number string last, otherwise, put it first.
+        if is_right_aligned:
+            return padding_str + number_str
+        else:
+            return number_str + padding_str
 
     # Draw a single tile on the screen at the specified column and row
     def draw_tile(
@@ -192,14 +215,24 @@ class StatusDisplay:
             self.renderer.COLOR_FG1,
             self.renderer.COLOR_BG,
         )
+
+        star_date: str = "░░░░░░░"
+        time_left: str = "░░░"
+        klingons: str = "░░"
+        if self.state.is_game_over() != True:
+            star_date = self.renderer.padded_string(self.state.star_date, 7, " ", False)
+            time_left = self.renderer.padded_string(self.state.time_left, 3, " ", False)
+            klingons = self.renderer.padded_string(self.state.klingons_remaining, 2, " ", False)
+
         self.renderer.draw_text(
             screen,
-            "║       Star date: ░░░░░░░.░           Time left: ░░░░░ days             Klingons: ░░░░░              ║",
+            f"║       Star date: {star_date}             Time left: {time_left} days             Klingons: {klingons}            ║",
             1,
             self.start_row + 2,
             self.renderer.COLOR_FG1,
             self.renderer.COLOR_BG,
         )
+
         self.renderer.draw_text(
             screen,
             "║                                                                                              ║",
