@@ -80,7 +80,7 @@ class RenderUtils:
     COLOR_RED = (255, 0, 0)
     COLOR_YELLOW = (255, 255, 0)
     COLOR_GREEN = (0, 255, 0)
-    COLOR_FG1 = (75, 75, 75)
+    COLOR_FG1 = (150, 150, 150)
     COLOR_FG2 = (50, 50, 50)
     COLOR_FG3 = (25, 25, 25)
     COLOR_BG = (0, 0, 0)
@@ -110,10 +110,10 @@ class RenderUtils:
         self.char_to_tile = self.__build_char_map(tiles)
         return tiles
 
-    # Convert an int to a string with padding to draw a predictable number of char.
+    # Convert an int to a string with padding to fill a bounding box.
     # Ex. padded_string(25, 5, '0', True) = "00025"
     # Ex. padded_string(125, 5, ' ', False) = "125  "
-    # Ex. error padded_string(55555, 5, ' ', True) = "99999" (the number is too big to fit the space)
+    # Ex. error padded_string(55555, 3, ' ', True) = "999" (the number is too big to fit the space)
     def padded_string(self, number: int, fixed_length: int, padding_chr: str, is_right_aligned: bool) -> str:
         number_str: str = str(number)
         padding_str: str = ""
@@ -185,11 +185,11 @@ class RenderUtils:
 
 
 ########################################################
-# Class Status()
+# Class StatusDisplay()
+# Represents the status of the game
 ########################################################
 
 
-# Represents the status of the game
 class StatusDisplay:
 
     def __init__(self, start_row: int, state: GameState, renderer: RenderUtils):
@@ -245,13 +245,13 @@ class StatusDisplay:
 
 ########################################################
 # Class GalaxyMap()
+# Represents the galaxy map in the Super Trek 78 game
 ########################################################
 
 
-# Represents the galaxy map in the Super Trek 78 game
 class GalaxyMap:
 
-    def __init__(self, start_row: int, galaxy_width: int, galaxy_height, state: GameState, renderer: RenderUtils):
+    def __init__(self, start_row: int, galaxy_width: int, galaxy_height: int, state: GameState, renderer: RenderUtils):
         self.start_row = start_row
         self.galaxy_width = galaxy_width
         self.galaxy_height = galaxy_height
@@ -333,6 +333,186 @@ class GalaxyMap:
         )
 
 
+
+########################################################
+# Class ShipStatus()
+########################################################
+
+
+# Represents the status of the game
+class ShipStatus:
+
+    def __init__(self, start_row: int, state: GameState, renderer: RenderUtils):
+        self.start_row = start_row
+        self.state = state
+        self.renderer = renderer
+
+    # Placeholder for drawing the map on the screen
+    def draw(self, screen: pygame.Surface):
+        self.renderer.draw_text(
+            screen,
+            "Condition: [Green]",
+            1,
+            self.start_row,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
+
+        self.renderer.draw_text(
+            screen,
+            "Energy: 1,000 Units",
+            1,
+            self.start_row + 2,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
+        self.renderer.draw_text(
+            screen,
+            "||||||||||||||||||||",
+            1,
+            self.start_row + 3,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
+
+        self.renderer.draw_text(
+            screen,
+            "Shields: <84%>",
+            1,
+            self.start_row + 5,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
+        self.renderer.draw_text(
+            screen,
+            "F:|||| A:|||| P:|||| S:||||",
+            1,
+            self.start_row + 6,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
+
+        self.renderer.draw_text(
+            screen,
+            "[C]loak: [OFF] <100%>",
+            1,
+            self.start_row + 8,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
+
+        self.renderer.draw_text(
+            screen,
+            "[W]arp drive: 5  <100%>",
+            1,
+            self.start_row + 10,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
+
+        self.renderer.draw_text(
+            screen,
+            "Computer: <100%>",
+            1,
+            self.start_row + 12,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
+
+        self.renderer.draw_text(
+            screen,
+            "Life support: <100%>",
+            1,
+            self.start_row + 13,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
+
+        self.renderer.draw_text(
+            screen,
+            "Subspace radio: <100%>",
+            1,
+            self.start_row + 14,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
+
+
+########################################################
+# Class SectorMap()
+# Represents the sector map
+########################################################
+
+
+class SectorMap:
+
+    def __init__(self, start_row: int, state: GameState, renderer: RenderUtils):
+        self.start_row = start_row
+        self.state = state
+        self.renderer = renderer
+
+    # Draw a single sector in the map
+    def __draw_location(self, screen: pygame.Surface, start_row: int, start_col: int):
+        self.renderer.draw_text(
+            screen,
+            "░░░░░",
+            start_col,
+            start_row,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
+ 
+    # Placeholder for drawing the map on the screen
+    # We use "start_row" to keep track of which row we are drawing
+    def draw(self, screen: pygame.Surface):
+        self.renderer.draw_text(
+            screen,
+            "   1   2   3   4   5   6   7   8   9  10",
+            29,
+            self.start_row,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
+
+        # Iterate through the sectors, one row at a time. y = row number
+        for y in range(self.state.galaxy_height):
+            if y + 1 < 10:
+                # right justify numbers less than 10
+                self.renderer.draw_text(
+                    screen,
+                    f"║   {y+1}                                                                                          ║",
+                    1,
+                    self.start_row + y + 2,
+                    self.renderer.COLOR_FG1,
+                    self.renderer.COLOR_BG,
+                )
+            else:
+                self.renderer.draw_text(
+                    screen,
+                    f"║  {y+1}                                                                                          ║",
+                    1,
+                    self.start_row + y + 2,
+                    self.renderer.COLOR_FG1,
+                    self.renderer.COLOR_BG,
+                )
+
+            # Within the row, draw the state of each sector
+            row = self.start_row + y + 2
+            for x in range(self.state.galaxy_width):
+                sector = self.state.sectors[y][x]
+                col = 8 + (x * 9)
+                #self.__draw_sector(screen, row, col, sector)
+
+        self.renderer.draw_text(
+            screen,
+            "╚══════════════════════════════════════════════════════════════════════════════════════════════╝",
+            1,
+            self.start_row + 11,
+            self.renderer.COLOR_FG1,
+            self.renderer.COLOR_BG,
+        )
+
+
 ########################################################
 # Class SuperTrek78()
 #
@@ -352,11 +532,15 @@ class SuperTrek78:
         self.renderer = RenderUtils(tile_size, "assets/Nice_curses_12x12.png")
         self.status_display = StatusDisplay(1, self.game_state, self.renderer)
         self.galaxy_map = GalaxyMap(5, GALAXY_WIDTH, GALAXY_HEIGHT, self.game_state, self.renderer)
+        self.ship_status = ShipStatus(19, self.game_state, self.renderer)
+        self.sector_map = SectorMap(19, self.game_state, self.renderer)
 
     def __draw_game(self):
         self.screen.fill((0, 0, 0))
         self.status_display.draw(self.screen)
         self.galaxy_map.draw(self.screen)
+        self.ship_status.draw(self.screen)
+        self.sector_map.draw(self.screen)
 
         pygame.display.update()
 
