@@ -1,0 +1,3 @@
+[I]mpulse       [O]rbit        [D]ock       
+[T]eleport      S[h]uttle      [S]can
+[P]robe         M[i]ne         [H]ail
