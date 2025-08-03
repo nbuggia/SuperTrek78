@@ -333,7 +333,6 @@ class GalaxyMap:
         )
 
 
-
 ########################################################
 # Class ShipStatus()
 ########################################################
@@ -461,7 +460,7 @@ class SectorMap:
             self.renderer.COLOR_FG1,
             self.renderer.COLOR_BG,
         )
- 
+
     # Placeholder for drawing the map on the screen
     # We use "start_row" to keep track of which row we are drawing
     def draw(self, screen: pygame.Surface):
@@ -501,7 +500,7 @@ class SectorMap:
             for x in range(self.state.galaxy_width):
                 sector = self.state.sectors[y][x]
                 col = 8 + (x * 9)
-                #self.__draw_sector(screen, row, col, sector)
+                # self.__draw_sector(screen, row, col, sector)
 
         self.renderer.draw_text(
             screen,

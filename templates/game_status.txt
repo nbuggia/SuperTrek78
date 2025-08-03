@@ -1,0 +1,4 @@
+╔═══════════════════════════════════════ SUPER TREK 78 ════════════════════════════════════════╗
+║                                                                                              ║
+║       Star date: {{star_date}}           Time left: {{time_left}} days             Klingons: {{klingons}}              ║
+║                                                                                              ║

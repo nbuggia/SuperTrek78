@@ -9,7 +9,8 @@ import shutil
 VENV_DIR = "venv"
 REQUIREMENTS_FILE = "requirements.txt"
 REQUIREMENTS_DEV_ENVIRON_FILE = "requirements-dev.txt"
-APP_ENTRY = "main.py"  
+APP_ENTRY = "main.py"
+
 
 def setup():
     # Create virtual environment
@@ -26,14 +27,19 @@ def setup():
     subprocess.run([pip, "install", "-r", REQUIREMENTS_FILE], check=True)
     subprocess.run([pip, "install", "-r", REQUIREMENTS_DEV_ENVIRON_FILE], check=True)
 
+
 def run():
-    python = os.path.join(VENV_DIR, "bin", "python") if os.name != "nt" else os.path.join(VENV_DIR, "Scripts", "python.exe")
+    python = (
+        os.path.join(VENV_DIR, "bin", "python") if os.name != "nt" else os.path.join(VENV_DIR, "Scripts", "python.exe")
+    )
     print("[*] Running SuperTrek78...")
     subprocess.run([python, APP_ENTRY], check=True)
 
 
 def test():
-    python = os.path.join(VENV_DIR, "bin", "python") if os.name != "nt" else os.path.join(VENV_DIR, "Scripts", "python.exe")
+    python = (
+        os.path.join(VENV_DIR, "bin", "python") if os.name != "nt" else os.path.join(VENV_DIR, "Scripts", "python.exe")
+    )
     print("[*] Running tests...")
     subprocess.run([python, "-m", "unittest", "discover", "-s", "tests"], check=True)
 

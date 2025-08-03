@@ -1,0 +1,17 @@
+Condition: [GREEN]          
+                            
+Energy: 1,000 units         
+|||||||||||||||||||         
+                             
+[S]hields: <84%>             
+<:|||| >:|||| ^:|||| v:||||  
+                             
+[C]loak: [OFF] <100%>        
+                             
+[W]arp drive: 5  <100%>      
+                             
+Computer: <100%>             
+                             
+Life support: <100%>  
+                            
+Subspace radio: <100%>      
