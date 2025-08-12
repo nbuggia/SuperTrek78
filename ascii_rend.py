@@ -16,7 +16,7 @@ import pygame
 from typing import Dict, List, Tuple
 
 
-class AsciiRend:
+class ARDraw:
     COLOR_RED = (255, 0, 0)
     COLOR_YELLOW = (255, 255, 0)
     COLOR_GREEN = (0, 255, 0)

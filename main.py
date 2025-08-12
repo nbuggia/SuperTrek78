@@ -8,7 +8,7 @@ import pygame
 from sys import exit
 from dataclasses import dataclass
 from typing import Dict, List, Tuple
-from ascii_rend import AsciiRend
+from ascii_rend import ARDraw
 
 # Constants
 GRID_COLS = 98
@@ -80,7 +80,7 @@ class GameState:
 
 class StatusDisplay:
 
-    def __init__(self, start_row: int, state: GameState, renderer: AsciiRend):
+    def __init__(self, start_row: int, state: GameState, renderer: ARDraw):
         self.start_row = start_row
         self.state = state
         self.renderer = renderer
@@ -139,7 +139,7 @@ class StatusDisplay:
 
 class GalaxyMap:
 
-    def __init__(self, start_row: int, galaxy_width: int, galaxy_height: int, state: GameState, renderer: AsciiRend):
+    def __init__(self, start_row: int, galaxy_width: int, galaxy_height: int, state: GameState, renderer: ARDraw):
         self.start_row = start_row
         self.galaxy_width = galaxy_width
         self.galaxy_height = galaxy_height
@@ -229,7 +229,7 @@ class GalaxyMap:
 # Represents the status of the game
 class ShipStatus:
 
-    def __init__(self, start_row: int, state: GameState, renderer: AsciiRend):
+    def __init__(self, start_row: int, state: GameState, renderer: ARDraw):
         self.start_row = start_row
         self.state = state
         self.renderer = renderer
@@ -333,7 +333,7 @@ class ShipStatus:
 
 class SectorMap:
 
-    def __init__(self, start_row: int, state: GameState, renderer: AsciiRend):
+    def __init__(self, start_row: int, state: GameState, renderer: ARDraw):
         self.start_row = start_row
         self.state = state
         self.renderer = renderer
@@ -416,7 +416,7 @@ class SuperTrek78:
         self.tile_size = tile_size
         self.screen = pygame.display.set_mode((width, height))
         self.game_state = GameState(GALAXY_WIDTH, GALAXY_HEIGHT)
-        self.renderer = AsciiRend(tile_size, "assets/Nice_curses_12x12.png")
+        self.renderer = ARDraw(tile_size, "assets/Nice_curses_12x12.png")
         self.status_display = StatusDisplay(1, self.game_state, self.renderer)
         self.galaxy_map = GalaxyMap(5, GALAXY_WIDTH, GALAXY_HEIGHT, self.game_state, self.renderer)
         self.ship_status = ShipStatus(19, self.game_state, self.renderer)
