@@ -10,16 +10,8 @@ from dataclasses import dataclass
 from typing import Dict, List, Tuple
 from ascii_rend import ARDraw, ARTemplate
 
-# Constants
-GRID_COLS = 98
-GRID_ROWS = 50
-TILE_SIZE = 12
-SCREEN_WIDTH = GRID_COLS * TILE_SIZE
-SCREEN_HEIGHT = GRID_ROWS * TILE_SIZE
-
 GALAXY_WIDTH = 10
 GALAXY_HEIGHT = 10
-
 
 ########################################################
 # Class Sector()
@@ -409,15 +401,17 @@ class SectorMap:
 
 class SuperTrek78:
 
-    def __init__(self, tile_size: int, width: int, height: int):
+    def __init__(self):
         pygame.init()
         pygame.display.set_caption("Super Trek 78")
         pygame.display.set_icon(pygame.image.load("assets/app_icon.png"))
 
         self.main_scene_layout: Dict = ARTemplate.parse_scene_template("templates/scene_main.layout")
-        
-        self.tile_size = tile_size
-        self.screen = pygame.display.set_mode((width, height))
+        self.tile_size = int(self.main_scene_layout("tile_size"))
+        self.screen_width_px = self.tile_size * int(self. main_scene_layout("width"))
+        self.screen_height_px = self.tile_size * int(self.main_scene_layout("height"))
+
+        self.screen = pygame.display.set_mode((self.screen_width_px, self.screen_height_px))
         self.game_state = GameState(GALAXY_WIDTH, GALAXY_HEIGHT)
         self.renderer = ARDraw(tile_size, "assets/Nice_curses_12x12.png")
         self.status_display = StatusDisplay(1, self.game_state, self.renderer)
@@ -450,7 +444,7 @@ class SuperTrek78:
 
 
 def main():
-    game = SuperTrek78(TILE_SIZE, SCREEN_WIDTH, SCREEN_HEIGHT)
+    game = SuperTrek78()
     game.run()
 
 

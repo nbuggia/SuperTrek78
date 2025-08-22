@@ -1,5 +1,6 @@
-scene_width: 93
-scene_height: 52
+tile_size: 12
+scene_width: 98
+scene_height: 50
 ---
 [ 0, 0] templates/parts/game_status.txt
 [ 0, 4] templates/parts/galaxy_map.txt

@@ -165,6 +165,7 @@ class ARTemplate:
     @staticmethod
     def parse_scene_template(file_path: str) -> Dict:
         scene_layout = {
+            "tile_size": 0,
             "width": 0,
             "height": 0,
             "parts": []
@@ -181,7 +182,9 @@ class ARTemplate:
         front_matter_parsed = False
         for line in lines:
             if not front_matter_parsed:
-                if line.startswith("scene_width:"):
+                if line.startswith("tile_size:"):
+                    scene_layout["tile_size"] = int(line.split(":")[1].strip())
+                elif line.startswith("scene_width:"):
                     scene_layout["width"] = int(line.split(":")[1].strip())
                 elif line.startswith("scene_height:"):
                     scene_layout["height"] = int(line.split(":")[1].strip())
