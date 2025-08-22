@@ -175,7 +175,7 @@ class ARTemplate:
         # list: a, b, c
         if "," in s:
             items = [x.strip() for x in s.split(",")]
-            return [_cast_value(x) for x in items]
+            return [ARTemplate._cast_value(x) for x in items]
         # bool / none
         low = s.lower()
         if low in {"true", "yes", "on"}:

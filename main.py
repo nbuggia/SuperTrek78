@@ -411,20 +411,20 @@ class SuperTrek78:
         config = configparser.ConfigParser()
         config.read("game.ini")
 
-        # width = config.getint("graphics", "width")
-        # energy = config.getint("gameplay", "starting_energy")
+        self.galaxy_width = config.getint("scene", "galaxy_width")
+        self.galaxy_height = config.getint("scene", "galaxy_height")
 
         # load templates
         self.scene_attributes, self.scene_templates = ARTemplate.parse_scene_template("templates/scene_main.layout")
         self.tile_size = self.scene_attributes.get("tile_size")
-        self.screen_width_px = self.tile_size * self.scene_attributes.get("width")
-        self.screen_height_px = self.tile_size * self.scene_attributes.get("height")
+        self.screen_width_px = self.tile_size * self.scene_attributes.get("scene_width")
+        self.screen_height_px = self.tile_size * self.scene_attributes.get("scene_height")
 
         self.screen = pygame.display.set_mode((self.screen_width_px, self.screen_height_px))
         self.game_state = GameState(GALAXY_WIDTH, GALAXY_HEIGHT)
         self.renderer = ARDraw(self.tile_size, "assets/Nice_curses_12x12.png")
         self.status_display = StatusDisplay(1, self.game_state, self.renderer)
-        self.galaxy_map = GalaxyMap(5, GALAXY_WIDTH, GALAXY_HEIGHT, self.game_state, self.renderer)
+        self.galaxy_map = GalaxyMap(5, self.galaxy_width, self.galaxy_height, self.game_state, self.renderer)
         self.ship_status = ShipStatus(19, self.game_state, self.renderer)
         self.sector_map = SectorMap(19, self.game_state, self.renderer)
 
