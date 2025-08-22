@@ -8,7 +8,7 @@ import pygame
 from sys import exit
 from dataclasses import dataclass
 from typing import Dict, List, Tuple
-from ascii_rend import ARDraw
+from ascii_rend import ARDraw, ARTemplate
 
 # Constants
 GRID_COLS = 98
@@ -413,6 +413,9 @@ class SuperTrek78:
         pygame.init()
         pygame.display.set_caption("Super Trek 78")
         pygame.display.set_icon(pygame.image.load("assets/app_icon.png"))
+
+        self.main_scene_layout: Dict = ARTemplate.parse_scene_template("templates/scene_main.layout")
+        
         self.tile_size = tile_size
         self.screen = pygame.display.set_mode((width, height))
         self.game_state = GameState(GALAXY_WIDTH, GALAXY_HEIGHT)

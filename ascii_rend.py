@@ -13,8 +13,12 @@
 # MiniWi font: https://patorjk.com/software/taag/#p=display&v=3&f=miniwi&t=__build_char_map
 
 import pygame
+import re
 from typing import Dict, List, Tuple
 
+# ---------------------------------------------------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------------------------------------------- #
 
 class ARDraw:
     COLOR_RED = (255, 0, 0)
@@ -26,11 +30,6 @@ class ARDraw:
     COLOR_BG = (0, 0, 0)
 
     # ---------------------------------------------------------------------------------------------------------------- #
-    #     ▘  ▘▗     ▗▘▝▖
-    #     ▌▛▌▌▜▘    ▐  ▌
-    # ▄▖▄▖▌▌▌▌▐▖▄▖▄▖▐  ▌
-    #               ▝▖▗▘
-    # ---------------------------------------------------------------------------------------------------------------- #
 
     def __init__(self, tile_size: int, tileset_path: str) -> None:
         self.tile_size = tile_size
@@ -38,21 +37,11 @@ class ARDraw:
         self.tile_set: List[pygame.Surface] = self.__load_tileset(tile_size=tile_size, tileset_path=tileset_path)
 
     # ---------------------------------------------------------------------------------------------------------------- #
-    #     ▌   ▘▜  ▌    ▌              ▗▘▝▖
-    #     ▛▌▌▌▌▐ ▛▌  ▛▘▛▌▀▌▛▘  ▛▛▌▀▌▛▌▐  ▌
-    # ▄▖▄▖▙▌▙▌▌▐▖▙▌▄▖▙▖▌▌█▌▌ ▄▖▌▌▌█▌▙▌▐  ▌
-    #                               ▌ ▝▖▗▘
-    # ---------------------------------------------------------------------------------------------------------------- #
 
     # CP437 includes 256 characters: map byte index (0–255) to surface
     def __build_char_map(self, tile_set: List[pygame.Surface]) -> Dict[int, pygame.Surface]:
         return {i: tile_set[i] for i in range(256)}
 
-    # ---------------------------------------------------------------------------------------------------------------- #
-    #     ▜      ▌  ▗ ▘▜       ▗ ▗▘▝▖
-    #     ▐ ▛▌▀▌▛▌  ▜▘▌▐ █▌▛▘█▌▜▘▐  ▌
-    # ▄▖▄▖▐▖▙▌█▌▙▌▄▖▐▖▌▐▖▙▖▄▌▙▖▐▖▐  ▌
-    #                            ▝▖▗▘
     # ---------------------------------------------------------------------------------------------------------------- #
 
     # Load the tileset asset and create a list of tiles
@@ -71,11 +60,6 @@ class ARDraw:
         self.char_to_tile = self.__build_char_map(tiles)
         return tiles
     
-    # ---------------------------------------------------------------------------------------------------------------- #
-    #      ▌ ▌   ▌    ▗   ▘    ▗▘▝▖
-    # ▛▌▀▌▛▌▛▌█▌▛▌  ▛▘▜▘▛▘▌▛▌▛▌▐  ▌
-    # ▙▌█▌▙▌▙▌▙▖▙▌▄▖▄▌▐▖▌ ▌▌▌▙▌▐  ▌
-    # ▌                      ▄▌▝▖▗▘
     # ---------------------------------------------------------------------------------------------------------------- #
 
     # Convert an int to a string with padding to fill a bounding box.
@@ -101,11 +85,6 @@ class ARDraw:
             return number_str + padding_str
         
     # ---------------------------------------------------------------------------------------------------------------- #
-    #      ▌ ▌   ▌    ▗   ▘    ▗▘▝▖
-    # ▛▌▀▌▛▌▛▌█▌▛▌  ▛▘▜▘▛▘▌▛▌▛▌▐  ▌
-    # ▙▌█▌▙▌▙▌▙▖▙▌▄▖▄▌▐▖▌ ▌▌▌▙▌▐  ▌
-    # ▌                      ▄▌▝▖▗▘
-    # ---------------------------------------------------------------------------------------------------------------- #
 
     # Draw a single tile on the screen at the specified column and row
     def draw_tile(
@@ -124,11 +103,6 @@ class ARDraw:
         tinted.fill(fg, special_flags=pygame.BLEND_MULT)
         screen.blit(tinted, (x, y))
 
-    # ---------------------------------------------------------------------------------------------------------------- #
-    #      ▌ ▌   ▌    ▗   ▘    ▗▘▝▖
-    # ▛▌▀▌▛▌▛▌█▌▛▌  ▛▘▜▘▛▘▌▛▌▛▌▐  ▌
-    # ▙▌█▌▙▌▙▌▙▖▙▌▄▖▄▌▐▖▌ ▌▌▌▙▌▐  ▌
-    # ▌                      ▄▌▝▖▗▘
     # ---------------------------------------------------------------------------------------------------------------- #
 
     # Draw a string of text starting at the specified column and row
@@ -166,9 +140,67 @@ class ARDraw:
                 screen.blit(char_surface, (x, y))
 
 
+# ---------------------------------------------------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------------------------------------------- #
+
+class ARTemplate:
+
     # ---------------------------------------------------------------------------------------------------------------- #
-    #      ▌ ▌   ▌    ▗   ▘    ▗▘▝▖
-    # ▛▌▀▌▛▌▛▌█▌▛▌  ▛▘▜▘▛▘▌▛▌▛▌▐  ▌
-    # ▙▌█▌▙▌▙▌▙▖▙▌▄▖▄▌▐▖▌ ▌▌▌▙▌▐  ▌
-    # ▌                      ▄▌▝▖▗▘
+
+    @staticmethod
+    def _parse_scene_template_part(file_path: str) -> List[str]:
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                return [line.rstrip('\n') for line in file]
+        except FileNotFoundError:
+            print(f"[AsciiRend] File not found: {file_path}")
+            return []
+        except Exception as e:
+            print(f"[AsciiRend] Unknown error loading scene template: {file_path}")
+            return []
+
     # ---------------------------------------------------------------------------------------------------------------- #
+
+    @staticmethod
+    def parse_scene_template(file_path: str) -> Dict:
+        scene_layout = {
+            "width": 0,
+            "height": 0,
+            "parts": []
+        }
+
+        try: 
+            with open(file_path, 'r', encoding='utf-8') as file:
+                lines = [line.strip() for line in file if line.strip()]
+        except FileNotFoundError:
+            print(f"[AsciiRend] File not found: {file_path}")
+        except Exception as e:
+            print(f"[AsciiRend] Unknown error loading scene template: {file_path}")
+
+        front_matter_parsed = False
+        for line in lines:
+            if not front_matter_parsed:
+                if line.startswith("scene_width:"):
+                    scene_layout["width"] = int(line.split(":")[1].strip())
+                elif line.startswith("scene_height:"):
+                    scene_layout["height"] = int(line.split(":")[1].strip())
+                elif line.strip() == "---":
+                    front_matter_parsed = True
+            else:
+                # Match lines like: [ 0,20] parts/ship_status.txt
+                match = re.match(r"\[\s*(\d+),\s*(\d+)\]\s+(.*)", line)
+                if match:
+                    x = int(match.group(1))
+                    y = int(match.group(2))
+                    file_path_part = match.group(3).strip()
+                    lines = ARTemplate._parse_scene_template_part(file_path_part)
+                    scene_layout["parts"].append({
+                        "x": x,
+                        "y": y,
+                        "path": file_path_part,
+                        "lines": lines
+                    })
+        return scene_layout
+        
+

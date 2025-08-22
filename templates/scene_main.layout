@@ -1,10 +1,10 @@
-scene_width: 
-scene_height: 
+scene_width: 93
+scene_height: 52
 ---
-[ 0, 0] parts/game_status.txt
-[ 0, 4] parts/galaxy_map.txt
-[ 0,20] parts/ship_status.txt
-[30,20] parts/sector_map.txt
-[74,20] parts/weapons.txt
-[30,34] parts/command_list.txt
-[ 0,38] parts/console.txt
+[ 0, 0] templates/parts/game_status.txt
+[ 0, 4] templates/parts/galaxy_map.txt
+[ 0,20] templates/parts/ship_status.txt
+[30,20] templates/parts/sector_map.txt
+[74,20] templates/parts/weapons.txt
+[30,34] templates/parts/command_list.txt
+[ 0,38] templates/parts/console.txt
