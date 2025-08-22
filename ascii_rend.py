@@ -12,13 +12,16 @@
 # ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████ #
 # MiniWi font: https://patorjk.com/software/taag/#p=display&v=3&f=miniwi&t=__build_char_map
 
-import pygame
+from __future__ import annotations
 import re
-from typing import Dict, List, Tuple
+import pygame
+from pathlib import Path
+from typing import Dict, List, Tuple, Any
 
 # ---------------------------------------------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------------------------------------------- #
+
 
 class ARDraw:
     COLOR_RED = (255, 0, 0)
@@ -59,7 +62,7 @@ class ARDraw:
 
         self.char_to_tile = self.__build_char_map(tiles)
         return tiles
-    
+
     # ---------------------------------------------------------------------------------------------------------------- #
 
     # Convert an int to a string with padding to fill a bounding box.
@@ -83,7 +86,7 @@ class ARDraw:
             return padding_str + number_str
         else:
             return number_str + padding_str
-        
+
     # ---------------------------------------------------------------------------------------------------------------- #
 
     # Draw a single tile on the screen at the specified column and row
@@ -144,6 +147,7 @@ class ARDraw:
 # ---------------------------------------------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------------------------------------------- #
 
+
 class ARTemplate:
 
     # ---------------------------------------------------------------------------------------------------------------- #
@@ -151,8 +155,8 @@ class ARTemplate:
     @staticmethod
     def _parse_scene_template_part(file_path: str) -> List[str]:
         try:
-            with open(file_path, 'r', encoding='utf-8') as file:
-                return [line.rstrip('\n') for line in file]
+            with open(file_path, "r", encoding="utf-8") as file:
+                return [line.rstrip("\n") for line in file]
         except FileNotFoundError:
             print(f"[AsciiRend] File not found: {file_path}")
             return []
@@ -163,47 +167,83 @@ class ARTemplate:
     # ---------------------------------------------------------------------------------------------------------------- #
 
     @staticmethod
-    def parse_scene_template(file_path: str) -> Dict:
-        scene_layout = {
-            "tile_size": 0,
-            "width": 0,
-            "height": 0,
-            "parts": []
-        }
+    def _cast_value(raw: str) -> Any:
+        s = raw.strip()
+        # strip quotes
+        if (s.startswith('"') and s.endswith('"')) or (s.startswith("'") and s.endswith("'")):
+            return s[1:-1]
+        # list: a, b, c
+        if "," in s:
+            items = [x.strip() for x in s.split(",")]
+            return [_cast_value(x) for x in items]
+        # bool / none
+        low = s.lower()
+        if low in {"true", "yes", "on"}:
+            return True
+        if low in {"false", "no", "off"}:
+            return False
+        if low in {"none", "null"}:
+            return None
+        # int / float
+        try:
+            if "." in s or "e" in low:
+                return float(s)
+            return int(s)
+        except ValueError:
+            return s
 
-        try: 
-            with open(file_path, 'r', encoding='utf-8') as file:
-                lines = [line.strip() for line in file if line.strip()]
-        except FileNotFoundError:
-            print(f"[AsciiRend] File not found: {file_path}")
-        except Exception as e:
-            print(f"[AsciiRend] Unknown error loading scene template: {file_path}")
+    @staticmethod
+    def parse_scene_template(
+        path: str,
+        _PART_RE=re.compile(r"\[\s*(\d+)\s*,\s*(\d+)\s*\]\s+(.+)$"),
+        _KV_RE=re.compile(r"^\s*([^:#=\s]+)\s*[:=]\s*(.+?)\s*$"),
+    ) -> Tuple[Dict[str, Any], List[Tuple[int, int, str, List[str]]]]:
+        """
+        Reads a scene template file:
+            key: value
+            key2 = value2
+            ---
+            [ x, y] parts/whatever.txt
+        Returns: (front_matter, parts)
+        - front_matter: dict[str, Any]
+        - parts: list of (x, y, file_path)
+        """
+        p = Path(path)
+        if not p.exists():
+            raise FileNotFoundError(p)
 
-        front_matter_parsed = False
-        for line in lines:
-            if not front_matter_parsed:
-                if line.startswith("tile_size:"):
-                    scene_layout["tile_size"] = int(line.split(":")[1].strip())
-                elif line.startswith("scene_width:"):
-                    scene_layout["width"] = int(line.split(":")[1].strip())
-                elif line.startswith("scene_height:"):
-                    scene_layout["height"] = int(line.split(":")[1].strip())
-                elif line.strip() == "---":
-                    front_matter_parsed = True
-            else:
-                # Match lines like: [ 0,20] parts/ship_status.txt
-                match = re.match(r"\[\s*(\d+),\s*(\d+)\]\s+(.*)", line)
-                if match:
-                    x = int(match.group(1))
-                    y = int(match.group(2))
-                    file_path_part = match.group(3).strip()
-                    lines = ARTemplate._parse_scene_template_part(file_path_part)
-                    scene_layout["parts"].append({
-                        "x": x,
-                        "y": y,
-                        "path": file_path_part,
-                        "lines": lines
-                    })
-        return scene_layout
-        
+        scene_attributes: Dict[str, Any] = {}
+        scene_templates: List[Tuple[int, int, str, List[str]]] = []
+        in_front = True
 
+        with p.open("r", encoding="utf-8") as f:
+            for line in f:
+                raw = line.rstrip("\n")
+                if in_front:
+                    # parsing front matter attribute value pairs
+                    if raw.strip().startswith("---"):
+                        in_front = False
+                        continue
+                    if not raw.strip() or raw.lstrip().startswith(("#", ";", "//")):
+                        # exclude lines that are empty or comments
+                        continue
+                    m = _KV_RE.match(raw)
+                    if m:
+                        key, val = m.group(1), m.group(2)
+                        scene_attributes[key] = ARTemplate._cast_value(val)
+                    else:
+                        # ignore non key-value lines in front matter
+                        continue
+                else:
+                    # parsing the layout templates
+                    if not raw.strip():
+                        # exclude lines that are empty or comments
+                        continue
+                    m = _PART_RE.match(raw)
+                    if not m:
+                        # ignore lines that don’t match the placement syntax
+                        continue
+                    x, y, file_path = int(m.group(1)), int(m.group(2)), m.group(3).strip()
+                    template_lines = ARTemplate._parse_scene_template_part(file_path)
+                    scene_templates.append((x, y, file_path, template_lines))
+        return scene_attributes, scene_templates

@@ -5,6 +5,7 @@
 # best ascii tile repositories: https://dwarffortresswiki.org/Tileset_repository#16x16_sb_ascii.png
 
 import pygame
+import configparser
 from sys import exit
 from dataclasses import dataclass
 from typing import Dict, List, Tuple
@@ -406,14 +407,22 @@ class SuperTrek78:
         pygame.display.set_caption("Super Trek 78")
         pygame.display.set_icon(pygame.image.load("assets/app_icon.png"))
 
-        self.main_scene_layout: Dict = ARTemplate.parse_scene_template("templates/scene_main.layout")
-        self.tile_size = int(self.main_scene_layout("tile_size"))
-        self.screen_width_px = self.tile_size * int(self. main_scene_layout("width"))
-        self.screen_height_px = self.tile_size * int(self.main_scene_layout("height"))
+        # load game config
+        config = configparser.ConfigParser()
+        config.read("game.ini")
+
+        # width = config.getint("graphics", "width")
+        # energy = config.getint("gameplay", "starting_energy")
+
+        # load templates
+        self.scene_attributes, self.scene_templates = ARTemplate.parse_scene_template("templates/scene_main.layout")
+        self.tile_size = self.scene_attributes.get("tile_size")
+        self.screen_width_px = self.tile_size * self.scene_attributes.get("width")
+        self.screen_height_px = self.tile_size * self.scene_attributes.get("height")
 
         self.screen = pygame.display.set_mode((self.screen_width_px, self.screen_height_px))
         self.game_state = GameState(GALAXY_WIDTH, GALAXY_HEIGHT)
-        self.renderer = ARDraw(tile_size, "assets/Nice_curses_12x12.png")
+        self.renderer = ARDraw(self.tile_size, "assets/Nice_curses_12x12.png")
         self.status_display = StatusDisplay(1, self.game_state, self.renderer)
         self.galaxy_map = GalaxyMap(5, GALAXY_WIDTH, GALAXY_HEIGHT, self.game_state, self.renderer)
         self.ship_status = ShipStatus(19, self.game_state, self.renderer)
